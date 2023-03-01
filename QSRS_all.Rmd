@@ -1,0 +1,178 @@
+---
+title: "QSRS"
+author: "Stephen Leo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+library(ggplot2); library(rmarkdown)
+```
+
+## Model Setup
+
+```{r data, echo=F}
+setup <- c(paste0('Soil attribute: ', attribute),
+           paste0('Version: ', version),
+           paste0('Last updated: ', Sys.Date()),
+           paste0('Depths modelled: ', paste(depths[1:6], collapse=', ')),
+           paste0('Model: ', method_dsm),
+           paste0('% of data used for training: ', propn_training*100),
+           paste0('% of data used for testing: ', (1-propn_training)*100),
+           paste0('Number of k-folds used in the cross-validation: ', k_kfold))
+cat(setup, sep='\n')
+```
+
+Covariates used in model building
+
+Covariate details can be found at https://aussoilsdsm.esoil.io/dsm-covariates/covariate-data
+
+```{r covariates, echo=F}
+paged_table(data.frame('Covariates'=gsub('_qld', '', names(TrainDat)[3:length(names(TrainDat))])))
+```
+
+## Training Data
+
+Distribution of training data within each depth
+
+```{r, echo=F}
+DSM_data_depth <- data
+DSM_data_depth <- DSM_data_depth %>% 
+  pivot_longer(-!c(X0.5.cm, X5.15.cm, X15.30.cm, X30.60.cm, X60.100.cm, X100.200.cm), names_to = 'Depth', values_to = 'VALUE') %>% as.data.frame
+DSM_data_depth <- DSM_data_depth %>% drop_na
+DSM_data_depth$Depth = factor(DSM_data_depth$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+ggplot(DSM_data_depth, aes(x=VALUE))+
+  geom_histogram(aes(y=..density..), binwidth=.5, colour="black", fill="white")+
+  facet_wrap(~ Depth, scales='free')+
+  geom_vline(data=DSM_data_depth, aes(xintercept=mean(VALUE)),
+               linetype="dashed", size=1, colour="red")+
+  geom_density(alpha=.2, fill="red")+
+  theme_bw()+labs(y='Density', x='Value')
+```
+
+Summary statistics of training data
+
+```{r, echo=F}
+sum_data <- data.frame(unclass(summary(na.omit(data))), check.names=F, stringsAsFactors=F)
+rownames(sum_data) <- NULL
+sum_data$`      ID` <- NULL
+paged_table(sum_data)
+```
+
+## Model Fitting Results - Each Depth Separately
+
+The following results are from the generation of models for each depth separately.
+
+Calibration dataset
+
+List of metrics used:
+- RMSE    =   root mean squared error
+- R2      =   coefficient of determination
+- MAE     =   mean absolute error
+- MSE     =   mean squared error
+- CC      =   Lin's concordance correlation coefficient
+- Bias    =   mean bias
+- RMedSE  =   root median squared error
+- MedAE   =   median absolute error
+- MedBias =   median bias
+
+```{r cDat table, echo=F}
+cDat <- read.csv(paste0(resd, '/models/', ifelse(run_PCA,'PCA/','all/'), 'GOOFData.csv'))
+paged_table(cDat[1:6,1:10])
+```
+
+```{r cDat, echo=F}
+plot_data <- do.call(rbind, lapply(1:6, function(i){
+  read.csv(paste0(resd, 'models/', ifelse(run_PCA,'PCA/','all/'), depths[i], '/cDat_GOOF.csv'))
+}))
+plot_data$Depth = factor(plot_data$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+ggplot(plot_data, aes(Obs, Pred))+
+  geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
+  facet_wrap(~ Depth, scales='free')+
+  theme_bw()
+```
+
+Validation dataset (i.e. unseen data)
+
+```{r vDat table, echo=F}
+vDat <- read.csv(paste0(resd, '/models/', ifelse(run_PCA,'PCA/','all/'), 'GOOFData.csv'))
+paged_table(vDat[1:6, c(1,11:19)])
+```
+
+```{r vDat, echo=F}
+plot_data <- do.call(rbind, lapply(1:6, function(i){
+  read.csv(paste0(resd , 'models/', ifelse(run_PCA,'PCA/','all/'), depths[i], '/vDat_GOOF.csv'))
+}))
+plot_data$Depth = factor(plot_data$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+ggplot(plot_data, aes(Obs, Pred))+
+  geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
+  facet_wrap(~ Depth, scales='free')+
+  theme_bw()
+```
+
+Variable importance
+
+```{r vDat varimp, echo=F}
+if(names(ovi[1]) != 'Covariate'){ovi <- dplyr::rename(ovi, Covariate = Row.names)}
+ovi$Covariate <- gsub('_qld', '', ovi$Covariate)
+if (length(depths) == 7){paged_table(ovi[c(1:7,9)])} else
+{paged_table(ovi)}
+```
+
+## Model Fitting Results - Depth as Covariate
+
+The following results are from the generation of a single model using depth as a covariate.
+
+Calibration dataset
+
+List of metrics used:
+- RMSE    =   root mean squared error
+- R2      =   coefficient of determination
+- MAE     =   mean absolute error
+- MSE     =   mean squared error
+- CC      =   Lin's concordance correlation coefficient
+- Bias    =   mean bias
+- RMedSE  =   root median squared error
+- MedAE   =   median absolute error
+- MedBias =   median bias
+
+```{r cDat all table, echo=F}
+cDat <- read.csv(paste0(resd, '/models/', ifelse(run_PCA,'PCA/','all/'), 'GOOFData.csv'))
+paged_table(cDat[7:12,1:10])
+```
+
+```{r cDat all, echo=F}
+plot_data <- read.csv(paste0(resd , 'models/', ifelse(run_PCA,'PCA/','all/'), depths[7], '/cDat_GOOF.csv'))
+plot_data$Depth = factor(plot_data$Depth, levels=c('2.5','10','22.5','45','80','150'))
+ggplot(plot_data, aes(Obs, Pred))+
+  geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
+  facet_wrap(~ Depth, scales='free', labeller=labeller(Depth=c('2.5'='X0.5.cm','10'='X5.15.cm','22.5'='X15.30.cm',
+                                                                '45'='X30.60.cm','80'='X60.100.cm','150'='X100.200.cm')))+
+  theme_bw()
+```
+
+Validation dataset (i.e. unseen data)
+
+```{r vDat all table, echo=F}
+vDat <- read.csv(paste0(resd, '/models/', ifelse(run_PCA,'PCA/','all/'), 'GOOFData.csv'))
+paged_table(vDat[7:12, c(1,11:19)])
+```
+
+```{r vDat all, echo=F}
+plot_data <- read.csv(paste0(resd , '/models/', ifelse(run_PCA,'PCA/','all/'), depths[7], '/vDat_GOOF.csv'))
+plot_data$Depth = factor(plot_data$Depth, levels=c('2.5','10','22.5','45','80','150'))
+ggplot(plot_data, aes(Obs, Pred))+
+  geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
+  facet_wrap(~ Depth, scales='free', labeller=labeller(Depth=c('2.5'='X0.5.cm','10'='X5.15.cm','22.5'='X15.30.cm',
+                                                                '45'='X30.60.cm','80'='X60.100.cm','150'='X100.200.cm')))+
+  theme_bw()
+```
+
+Variable importance
+
+```{r vDat all varimp, echo=F}
+if(names(ovi[1]) != 'Covariate'){ovi <- rename(ovi, Covariate = Row.names)}
+ovi$Covariate <- gsub('_qld', '', ovi$Covariate)
+ovi <- ovi[order(-ovi$all),] # Sort in descending order of mean importance
+paged_table(ovi[order(-ovi$all),][c(1,8)])
+```
