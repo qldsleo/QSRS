@@ -138,12 +138,12 @@ summary(data)
 
 ###################################################################################################################################
 # scripts
-extraction <- paste0(code, 'extraction.R')
-modelling  <- paste0(code, 'modelling.R')
-mapping    <- paste0(code, 'mapping.R')
-mosaic     <- paste0(code, 'mosaic.R')
-rmarkdown  <- paste0(code, 'QSRS.Rmd')
-functions  <- paste0(code, 'functions.R')
+extraction <- paste0(code, 'QSRS/extraction.R')
+modelling  <- paste0(code, 'QSRS/modelling.R')
+mapping    <- paste0(code, 'QSRS/mapping.R')
+mosaic     <- paste0(code, 'QSRS/mosaic.R')
+rmarkdown  <- paste0(code, 'QSRS/QSRS.Rmd')
+functions  <- paste0(code, 'QSRS/functions.R')
 
 # parsed arguments from batch scripts
 args <- commandArgs(trailingOnly=T)
