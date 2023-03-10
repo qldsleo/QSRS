@@ -110,12 +110,5 @@ for (d in dep){
     }
     clusterR(t2, predict, filename=predvar95_file, format="GTiff", overwrite=T, args=list(model=model$finalModel, fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.95), ...)$predictions[,1]))
   }
-  
-  # predict(object=t2, model=model$finalModel, na.rm=T, filename=predvar05_file, format='GTiff', overwrite=T,
-  #         fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.05), ...)$predictions[,1])
-  
-  # predict(object=t2, model=model$finalModel, na.rm=T, filename=predvar95_file, format='GTiff', overwrite=T,
-  #         fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.95), ...)$predictions[,1])
 }
-
 endCluster()

@@ -28,7 +28,7 @@ Covariates used in model building
 Covariate details can be found at https://aussoilsdsm.esoil.io/dsm-covariates/covariate-data
 
 ```{r covariates, echo=F}
-paged_table(data.frame('Covariates'=gsub('_qld', '', names(TrainDat)[3:length(names(TrainDat))])))
+paged_table(data.frame('Covariates'=gsub('_qld', '', names(TrainDat)[2:length(names(TrainDat))])))
 ```
 
 ## Training Data
