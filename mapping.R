@@ -1,26 +1,18 @@
-chunk <- as.numeric(args[1])
+chunk <- as.numeric(args[4])
 print(chunk)
-cores <- as.numeric(args[2])
+cores <- as.numeric(args[5])
 print(cores)
-dep <- as.numeric(args[3])
+dep <- as.numeric(args[6])
 print(dep)
-var <- as.numeric(args[4])
+var <- as.numeric(args[7])
 print(var)
 
 # create directories
 dir.create(paste0(resd, method_dsm, '/maps'), showWarnings=F)
-if(run_PCA){
-  save_map_dir <- paste0(resd, method_dsm, '/maps/PCA')
-}else{
-  save_map_dir <- paste0(resd, method_dsm, '/maps/all')
-}
-dir.create(save_map_dir, showWarnings=F)
+save_map_dir <- paste0(resd, method_dsm, '/maps')
 
 # stack covariates
-if(run_PCA){
-  covariates <- read.csv(paste0(resd, method_dsm, '/models/', 'PCA_covariates.csv'))
-  list_ras <- paste0(covd, '/', covariates$covariates, '.tif')
-}else if(identical(covs_subset, 'all')){
+if(identical(covs_subset, 'all')){
   list_ras <- list.files(path=covd, pattern='.tif', full.names=T)
   list_ras <- list_ras[!list_ras %in% paste0(covd, '/', covs_dropped)]
 }else{
@@ -29,10 +21,7 @@ if(run_PCA){
 covariates.stack <- stack(list_ras)
 
 # rename covariates in stack for consistency
-if(run_PCA){
-  covariates <- read.csv(paste0(resd, method_dsm, '/models/', 'PCA_covariates.csv'))
-  list_ras <- paste0(covariates$covariates, '.tif')
-}else if(identical(covs_subset, 'all')){
+if(identical(covs_subset, 'all')){
   list_ras <- list.files(path=covd, pattern='.tif', full.names=F)
   list_ras <- list_ras[!list_ras %in% covs_dropped]
 }else{
@@ -52,7 +41,7 @@ for (d in dep){
   pred_depth <- depths[d]
   
   # load model
-  model <- readRDS(paste0(resd, method_dsm, '/models/', ifelse(run_PCA, 'PCA', 'all'), '/', pred_depth, '/mapMod.rds'))
+  model <- readRDS(paste0(resd, method_dsm, '/models/', pred_depth, '/mapMod.rds'))
   
   # create directories
   dir.create(paste0(save_map_dir, '/', pred_depth), showWarnings=F)
@@ -64,16 +53,6 @@ for (d in dep){
   pred_file      <- paste0(save_map_dir, '/', pred_depth, '/pred/', i, '.tif')
   predvar05_file <- paste0(save_map_dir, '/', pred_depth, '/predvar05/', i, '.tif')
   predvar95_file <- paste0(save_map_dir, '/', pred_depth, '/predvar95/', i, '.tif')
-  
-  if (d == 7){
-    for (k in c(2.5, 10, 22.5, 45, 80, 150)){
-      depth_rast <- covariates.stack[[1]]
-      values(depth_rast) <- k
-      names(depth_rast) <- 'Depth'
-      covariates.stack <- addLayer(covariates.stack, depth_rast)
-      clusterR(covariates.stack, predict, filename=pred_file, format="GTiff", overwrite=T, args=list(model=model))
-    }
-  }
   
   if (var == 50){
     clusterR(covariates.stack, predict, filename=pred_file, format="GTiff", overwrite=T, args=list(model=model))

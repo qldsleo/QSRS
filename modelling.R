@@ -53,7 +53,6 @@ pca_variables <- c(levels(as.factor(pca_variables$V1)), gsub('.tif','', covs_sub
 write.csv(data.frame('covariates'=pca_variables), file=paste0(resd, method_dsm, '/models/', 'PCA_covariates.csv'))
 
 # model fitting
-print('Starting model fitting...')
 cl <- makeCluster(cores)
 registerDoSNOW(cl)
 for (d in 1:length(depths)){

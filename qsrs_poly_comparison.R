@@ -30,3 +30,13 @@ test <- extract_df %>% mutate(
 ggplot(test, aes(CS1_CLAY, CS1_CLAY_QSRS))+geom_point()+geom_abline(colour='red')+
   scale_y_continuous(limits=c(0,60))+scale_x_continuous(limits=c(0,60))+
   labs(x='QSRS clay polygon', y='QSRS clay raster')
+
+
+
+labdata <- read.table(paste0(code, 'sali/ec/jim/1_raw_data/1_ec.txt'), header=T, sep=',')
+range(labdata$VALUE)
+labdata %>% dplyr::filter(VALUE > 50)
+
+fullfilename_td <- paste0(code, 'sali/ec/ec_harmonized.csv')
+data <- read.csv(fullfilename_td)
+summary(data)

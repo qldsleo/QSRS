@@ -1,31 +1,10 @@
-cores <- as.numeric(args[1])
-print(cores)
+cores <- as.numeric(args[4])
 
 # check coord names
-if((toupper(names(data)[1]) == 'LONGITUDE') & (toupper(names(data)[2]) == 'LATITUDE')){
-  names(data)[1] <- 'X'
-  names(data)[2] <- 'Y'
-}else if((toupper(names(data)[2]) == 'LONGITUDE') & (toupper(names(data)[1]) == 'LATITUDE')){
-  names(data)[1] <- 'Y'
-  names(data)[2] <- 'X'
-}else{
-  stop('Stopping - not sure which are the X/Y coordinates in data file!')
-}
-
-# check tifs exist in directory if not using 'all'
-if(!identical(covs_subset, 'all')){
-  if(!all(file.exists(paste0(covd, '/', covs_subset)))){
-    stop('Error - the requested covs_subset of covariates do not all exist in the covd directory!')
-  }
-}
+data <- data %>% dplyr::rename(X = LONGITUDE, Y = LATITUDE)
 
 # get covariate file names
-if(identical(covs_subset, 'all')){
-  files <- list.files(path=covd, pattern='.tif', full.names=T)
-  files <- files[!files %in% paste0(covd, '/', covs_dropped)]
-}else{
-  files <- paste0(covd, '/', covs_subset)
-}
+files <- list.files(path=covd, pattern='.tif', full.names=T)
 
 # stack covariate rasters
 r1 <- stack(files)
@@ -41,7 +20,7 @@ beginCluster(cores)
 DSM_data <- raster::extract(r1, data_sp, sp=1, method='simple')
 endCluster()
 DSM_data <- as.data.frame(DSM_data)
-DSM_data <- DSM_data %>% drop_na(names(DSM_data)[10:ncol(DSM_data)])
+DSM_data <- DSM_data %>% drop_na(names(DSM_data)[(3+length(depths)):ncol(DSM_data)])
 
 # convert any categorical variables to factors
 # covariates with factors NOT in QLD masked map are dropped entirely because we need them for mapping
@@ -70,8 +49,5 @@ for(fname_cov in covs_subset_cat){
   }
 }
 
-# create the resd for this analysis
-dir.create(resd, showWarnings=F)
-
-# save intersected data
-write.csv(DSM_data, file=paste0(resd, '/Site_Covariate_intersect.csv'), row.names=F)
+# create directory and save extraction
+write.csv(DSM_data, file=paste0(extd, '/Site_Covariate_intersect.csv'), row.names=F)

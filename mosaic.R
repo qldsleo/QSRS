@@ -1,6 +1,6 @@
-dep <- as.numeric(args[1])
+dep <- as.numeric(args[4])
 print(dep)
-var <- as.numeric(args[2])
+var <- as.numeric(args[5])
 print(var)
 
 # which depth

@@ -15,7 +15,7 @@ library(ggplot2); library(rmarkdown)
 setup <- c(paste0('Soil attribute: ', attribute),
            paste0('Version: ', version),
            paste0('Last updated: ', Sys.Date()),
-           paste0('Depths modelled: ', paste(depths[1:6], collapse=', ')),
+           paste0('Depths modelled: ', paste(depths, collapse=', ')),
            paste0('Model: ', method_dsm),
            paste0('% of data used for training: ', propn_training*100),
            paste0('% of data used for testing: ', (1-propn_training)*100),
@@ -28,19 +28,19 @@ Covariates used in model building
 Covariate details can be found at https://aussoilsdsm.esoil.io/dsm-covariates/covariate-data
 
 ```{r covariates, echo=F}
-paged_table(data.frame('Covariates'=gsub('_qld', '', names(TrainDat)[2:length(names(TrainDat))])))
+paged_table(data.frame('Covariate' = sort(unique(gsub("\\d+$", "", ovi$Covariate)))))
 ```
 
 ## Training Data
 
-Distribution of training data within each depth
+Distribution of soil attribute data within each depth
 
 ```{r, echo=F}
 DSM_data_depth <- data
 DSM_data_depth <- DSM_data_depth %>% 
-  pivot_longer(-!c(X0.5.cm, X5.15.cm, X15.30.cm, X30.60.cm, X60.100.cm, X100.200.cm), names_to = 'Depth', values_to = 'VALUE') %>% as.data.frame
+  pivot_longer(-!c(all_of(depths)), names_to = 'Depth', values_to = 'VALUE') %>% as.data.frame
 DSM_data_depth <- DSM_data_depth %>% drop_na
-DSM_data_depth$Depth = factor(DSM_data_depth$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+DSM_data_depth$Depth = factor(DSM_data_depth$Depth, levels=c(depths))
 ggplot(DSM_data_depth, aes(x=VALUE))+
   geom_histogram(aes(y=..density..), binwidth=.5, colour="black", fill="white")+
   facet_wrap(~ Depth, scales='free')+
@@ -50,13 +50,11 @@ ggplot(DSM_data_depth, aes(x=VALUE))+
   theme_bw()+labs(y='Density', x='Value')
 ```
 
-Summary statistics of training data
+Summary statistics of soil attribute data
 
 ```{r, echo=F}
-sum_data <- data.frame(unclass(summary(na.omit(data))), check.names=F, stringsAsFactors=F)
-rownames(sum_data) <- NULL
-sum_data$`      ID` <- NULL
-paged_table(sum_data)
+sum_data <- data.frame(unclass(summary(na.omit(data))), check.names=F, stringsAsFactors=F, row.names=NULL)
+paged_table(sum_data[c(1:2,4:ncol(sum_data))])
 ```
 
 ## Model Fitting Results - Each Depth Separately
@@ -78,14 +76,14 @@ List of metrics used:
 
 ```{r cDat table, echo=F}
 cDat <- read.csv(paste0(save_dir, '/GOOFData.csv'))
-paged_table(cDat[1:6,1:10])
+paged_table(cDat[1:length(depths),1:10])
 ```
 
 ```{r cDat, echo=F}
-plot_data <- do.call(rbind, lapply(1:6, function(i){
+plot_data <- do.call(rbind, lapply(1:length(depths), function(i){
   read.csv(paste0(save_dir, '/', depths[i], '/cDat_GOOF.csv'))
 }))
-plot_data$Depth = factor(plot_data$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+plot_data$Depth = factor(plot_data$Depth, levels=c(depths))
 ggplot(plot_data, aes(Obs, Pred))+
   geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
   facet_wrap(~ Depth, scales='free')+
@@ -96,14 +94,14 @@ Validation dataset (i.e. unseen data)
 
 ```{r vDat table, echo=F}
 vDat <- read.csv(paste0(save_dir, '/GOOFData.csv'))
-paged_table(vDat[1:6, c(1,11:19)])
+paged_table(vDat[1:length(depths), c(1,11:19)])
 ```
 
 ```{r vDat, echo=F}
-plot_data <- do.call(rbind, lapply(1:6, function(i){
+plot_data <- do.call(rbind, lapply(1:length(depths), function(i){
   read.csv(paste0(save_dir, '/', depths[i], '/vDat_GOOF.csv'))
 }))
-plot_data$Depth = factor(plot_data$Depth, levels=c('X0.5.cm','X5.15.cm','X15.30.cm','X30.60.cm','X60.100.cm','X100.200.cm'))
+plot_data$Depth = factor(plot_data$Depth, levels=c(depths))
 ggplot(plot_data, aes(Obs, Pred))+
   geom_point(size=0.5)+geom_abline(col='red', size=0.75)+geom_smooth(method='lm',formula='y ~ x', col='blue', size=0.75)+
   facet_wrap(~ Depth, scales='free')+
@@ -115,6 +113,24 @@ Variable importance
 ```{r vDat varimp, echo=F}
 if(names(ovi[1]) != 'Covariate'){ovi <- dplyr::rename(ovi, Covariate = Row.names)}
 ovi$Covariate <- gsub('_qld', '', ovi$Covariate)
-if (length(depths) == 7){paged_table(ovi[c(1:7,9)])} else
-{paged_table(ovi)}
+paged_table(ovi)
+```
+
+## Example prediction map - Bundaberg region
+
+```{r bundy, echo=F}
+paste0(depths[1])
+plot(prediction)
+```
+
+Bundaberg agricultural land
+
+```{r bundy2, echo=F}
+plot(prediction2)
+```
+
+Bundaberg city
+
+```{r bundy3, echo=F}
+plot(prediction3)
 ```
