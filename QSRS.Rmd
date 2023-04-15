@@ -19,7 +19,9 @@ setup <- c(paste0('Soil attribute: ', attribute),
            paste0('Model: ', method_dsm),
            paste0('% of data used for training: ', propn_training*100),
            paste0('% of data used for testing: ', (1-propn_training)*100),
-           paste0('Number of k-folds used in the cross-validation: ', k_kfold))
+           paste0('Number of k-folds used in the cross-validation: ', k_kfold),
+           paste0('Number of bootstrap resamples: ', nbags, ' (NOTE: applicable to all models but qrf)'),
+           paste0('Data transformations: ', transform))
 cat(setup, sep='\n')
 ```
 

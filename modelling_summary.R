@@ -165,6 +165,7 @@ covariates.stack <- crop(covariates.stack, extent(152.1, 152.6, -25.08, -24.7))
 model <- readRDS(paste0(resd, method_dsm, '/models/',depths[1],'/mapMod.rds'))
 beginCluster(5)
 prediction <- clusterR(covariates.stack, predict, args=list(model=model))
+prediction <- prediction %>% tfmFn(invt=T)
 endCluster()
 
 prediction2 <- crop(prediction, extent(152.295639, 152.358467, -24.981390, -24.921158))
@@ -173,4 +174,4 @@ prediction3 <- crop(prediction, extent(152.332203, 152.376835, -24.898894, -24.8
 # create report
 rmarkdown::render(input=rmarkdown,
                   output_file=paste0(attribute, '_v', version, '_', method_dsm, '.html'),
-                  output_dir=paste0('/scratch/rsc3/leos/QSRS/soil_attributes/', attribute, '/'))
+                  output_dir=paste0(extd, '/'))

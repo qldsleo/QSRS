@@ -1,8 +1,8 @@
-libpath <- '/export/home/leos/libs'; .libPaths(libpath)
+libpath <- '/scratch/rsc3/leos/R/libs'; .libPaths(libpath)
 library(dplyr); library(ggplot2); library(tidyr); library(plotly)
 email <- 'stephen.leo@des.qld.gov.au'
 
-# clay, silt, fs, cs, cat_ca, cat_mg, cat_na, cat_k, cat_cec, tn, tp, clay_act, esp, sar (col_p, wb_oc - not done)
+# clay, silt, fs, cs, cat_ca, cat_mg, cat_na, cat_k, cat_cec, tn, tp, clay_act, esp, sar (wb_oc - not done)
 
 ######################################################################################################################
 # use for extracting
@@ -59,7 +59,7 @@ batch_script_modelling <- function(attribute, version, depth, cpu){
         }
     }
 }
-batch_script_modelling(attribute = c('fs','cs'), version = 1:2, depth = 2:6, cpu = 30)
+batch_script_modelling(attribute = c('phw'), version = 5, depth = 6, cpu = 15)
 
 ######################################################################################################################
 # use for modelling summarising
@@ -88,7 +88,7 @@ batch_script_model_sum <- function(attribute, version){
         }
     }
 }
-batch_script_model_sum(attribute = c('clay'), version = 5:6)
+batch_script_model_sum(attribute = c('phw'), version = 5)
 
 ######################################################################################################################
 # use for mapping

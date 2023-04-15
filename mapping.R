@@ -55,7 +55,8 @@ for (d in dep){
   predvar95_file <- paste0(save_map_dir, '/', pred_depth, '/predvar95/', i, '.tif')
   
   if (var == 50){
-    clusterR(covariates.stack, predict, filename=pred_file, format="GTiff", overwrite=T, args=list(model=model))
+    prediction <- clusterR(covariates.stack, predict, args=list(model=model))
+    writeRaster(tfmFn(prediction, invt=T), filename=pred_file, format="GTiff", overwrite=T)
   } else if (var == 5){
     t2 <- covariates.stack
     for(fname_cov in covs_subset_cat){
@@ -71,7 +72,8 @@ for (d in dep){
         }
       }else{}
     }
-  clusterR(t2, predict, filename=predvar05_file, format="GTiff", overwrite=T, args=list(model=model$finalModel, fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.05), ...)$predictions[,1]))
+  prediction <- clusterR(t2, predict, args=list(model=model$finalModel, fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.05), ...)$predictions[,1]))
+  writeRaster(tfmFn(prediction, invt=T), filename=predvar05_file, format="GTiff", overwrite=T)
   } else if (var == 95){
     t2 <- covariates.stack
     for(fname_cov in covs_subset_cat){
@@ -87,7 +89,8 @@ for (d in dep){
         }
       }else{}
     }
-    clusterR(t2, predict, filename=predvar95_file, format="GTiff", overwrite=T, args=list(model=model$finalModel, fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.95), ...)$predictions[,1]))
+    prediction <- clusterR(t2, predict, args=list(model=model$finalModel, fun=function(model, ...) predict(model, type='quantiles', quantiles=c(0.95), ...)$predictions[,1]))
+    writeRaster(tfmFn(prediction, invt=T), filename=predvar95_file, format="GTiff", overwrite=T)
   }
 }
 endCluster()
