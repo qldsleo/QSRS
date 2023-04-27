@@ -110,6 +110,14 @@ ggplot(plot_data, aes(Obs, Pred))+
   theme_bw()
 ```
 
+Validation stats from SLGA
+
+```{r slga vDat table, echo=F}
+slga_vDat <- read.csv(paste0(slga_stats))
+slga_vDat <- slga_vDat %>% dplyr::filter(Variable == attribute)
+paged_table(slga_vDat)
+```
+
 Variable importance
 
 ```{r vDat varimp, echo=F}

@@ -26,7 +26,6 @@ dir.create(paste0(resd, method_dsm, '/models'), showWarnings=F)
 save_dir <- paste0(resd, method_dsm, '/models')
 
 # model fitting
-# cl <- makeCluster(cores); registerDoSNOW(cl)
 for (d in dep){
   print(depths[d])
   set.seed(123)
@@ -216,4 +215,3 @@ for (d in dep){
     stop('Error - unknown method_dsm!')
   }
 }
-# stopCluster(cl)

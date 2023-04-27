@@ -5,10 +5,10 @@ range01 <- function(x){
 d = 1
 
 pred_depth <- depths[d]
-model <- readRDS(paste0(resd, 'models/', ifelse(run_PCA,'PCA/','all/'), pred_depth, '/mapMod.rds'))
+model <- readRDS(paste0(resd, method_dsm, '/models/', pred_depth, '/mapMod.rds'))
 model
 
-DSM_data <- read.csv(paste0(resd, '/Site_Covariate_intersect.csv'))
+DSM_data <- read.csv(paste0(extd, '/Site_Covariate_intersect.csv'))
 DSM_data <- DSM_data %>% drop_na(names(DSM_data)[10:ncol(DSM_data)])
 if(!is.null(covs_subset_cat)){
   for(fname_cov in covs_subset_cat){
@@ -30,7 +30,7 @@ autoplot(shap, type = "dependence", feature = "PM_radmap_v4_2019_filtered_dose_G
 shap2 <- shap %>% as.data.frame %>% mutate(ID = 1:nrow(shap))
 shap_pivot <- shap2 %>% pivot_longer(!ID, names_to = 'covariate', values_to = 'shapley_values')
 
-DSM_data <- read.csv(paste0(resd, '/Site_Covariate_intersect.csv'))
+DSM_data <- read.csv(paste0(extd, '/Site_Covariate_intersect.csv'))
 DSM_data <- DSM_data %>% drop_na(names(DSM_data)[10:ncol(DSM_data)])
 shap_norm <- DSM_data[10:ncol(DSM_data)] %>% mutate_all(range01)
 if(!is.null(covs_subset_cat)){

@@ -21,6 +21,7 @@ code            <- '/export/home/leos/QSRS/code/'
 fullfilename_td <- '/scratch/rsc3/leos/QSRS/soil_attributes/all_SALI_data.csv'
 fullfilename_A_inserts <- '/scratch/rsc3/leos/QSRS/soil_attributes/A_horizon_inserts.csv'
 fullfilename_B_inserts <- '/scratch/rsc3/leos/QSRS/soil_attributes/B_horizon_inserts.csv'
+slga_stats      <- '/scratch/rsc3/leos/QSRS/soil_attributes/slga_validation_stats.csv'
 
 # modelling information
 method_dsm     <- 'qrf' # qrf, cubist, mlm, rf
@@ -54,8 +55,24 @@ library(raster); library(terra); library(doParallel); library(ranger); library(c
 library(rmarkdown); library(factoextra); library(doSNOW); library(lubridate); library(mpspline2); library(DescTools); library(sf)
 library(reshape); library(quickPlot); library(doMC); library(fastmap); library(plyr); library(sp); library(rgdal); library(Cubist)
 
+# scripts
+extraction <- paste0(code, 'QSRS/extraction.R')
+modelling  <- paste0(code, 'QSRS/modelling.R')
+model_sum  <- paste0(code, 'QSRS/modelling_summary.R')
+plots      <- paste0(code, 'QSRS/plots.R')
+mapping    <- paste0(code, 'QSRS/mapping.R')
+mosaic     <- paste0(code, 'QSRS/mosaic.R')
+rmarkdown  <- paste0(code, 'QSRS/QSRS.Rmd')
+functions  <- paste0(code, 'QSRS/functions.R')
+spline_clean <- paste0(code, 'QSRS/spline_clean.R')
+source(functions)
+
 # load training dataset
-source(paste0(code, 'QSRS/spline_clean.R'))
+if (process == 'extract'){
+  source(spline_clean)
+} else {
+  data <- read.csv(paste0(extd, '/harmonized.csv'))
+}
 print('Training data - ')
 head(data)
 
@@ -69,18 +86,7 @@ print(paste0('Depths - ', paste(depths, collapse=', ')))
 summary(data)
 
 ###################################################################################################################################
-# scripts
-extraction <- paste0(code, 'QSRS/extraction.R')
-modelling  <- paste0(code, 'QSRS/modelling.R')
-model_sum  <- paste0(code, 'QSRS/modelling_summary.R')
-plots      <- paste0(code, 'QSRS/plots.R')
-mapping    <- paste0(code, 'QSRS/mapping.R')
-mosaic     <- paste0(code, 'QSRS/mosaic.R')
-rmarkdown  <- paste0(code, 'QSRS/QSRS.Rmd')
-functions  <- paste0(code, 'QSRS/functions.R')
-
-source(functions)
-
+# run selected process
 if(process == 'extract'){
   source(extraction)
 } else if (process == 'model'){

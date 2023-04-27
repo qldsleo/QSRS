@@ -2,7 +2,7 @@ libpath <- '/scratch/rsc3/leos/R/libs'; .libPaths(libpath)
 library(dplyr); library(ggplot2); library(tidyr); library(plotly)
 email <- 'stephen.leo@des.qld.gov.au'
 
-# clay, silt, fs, cs, cat_ca, cat_mg, cat_na, cat_k, cat_cec, tn, tp, clay_act, esp, sar (wb_oc - not done)
+# clay, silt, sand, fs, cs, cat_ca, cat_mg, cat_na, cat_k, cat_cec, tn, tp, clay_act, esp, sar (wb_oc - not done)
 
 ######################################################################################################################
 # use for extracting
@@ -59,10 +59,10 @@ batch_script_modelling <- function(attribute, version, depth, cpu){
         }
     }
 }
-batch_script_modelling(attribute = c('phw'), version = 5, depth = 6, cpu = 15)
+batch_script_modelling(attribute = c('phw'), version = 5, depth = 1:6, cpu = 15)
 
 ######################################################################################################################
-# use for modelling summarising
+# use for model summarising
 batch_script_model_sum <- function(attribute, version){
     
     for (attr in attribute){
@@ -96,7 +96,7 @@ cpu_mem_model <- function(attribute, version, chunks, depth, var){
     cpu_mem_model <- NULL
     for (chunk in chunks){
         print(chunk)
-        check_file <- paste0('code/batch_scripts/mapping/',attribute,'/v',version,'/error_log',chunk,'-',depth,'-',var,'.log')
+        check_file <- paste0('/scratch/rsc3/leos/QSRS/batch_scripts/mapping/',attribute,'/v',version,'/error_log',chunk,'-',depth,'-',var,'.log')
         if (file.exists(check_file)){
             open_file <- readLines(con = check_file)
             cpupercent <- as.numeric(gsub('[^0-9]', '', unlist(strsplit(open_file[grep('cpupercent', open_file)], ','))[5]))
@@ -113,7 +113,7 @@ cpu_mem_model <- function(attribute, version, chunks, depth, var){
     }
     return(cpu_mem_model)
 }
-cpu_mem_data <- cpu_mem_model(attribute = 'ec', version = 3, chunks = 1:200, depth = 1, var = 50)
+cpu_mem_data <- cpu_mem_model(attribute = 'phw', version = 5, chunks = 1:200, depth = 1, var = 50)
 hpc_model <- pivot_longer(cpu_mem_data, cols=c('cpupercent','mem','walltime'), names_to='metric') %>% as.data.frame
 ggplotly(ggplot(hpc_model, aes(chunk, value))+
              geom_point()+
@@ -165,8 +165,8 @@ batch_script_mapping <- function(attribute, version, variance, depth, chunk){
                                        paste0('singularity exec docker://artemis:5050/qld/des/rsc/rserver_4.2.1:latest Rscript /export/home/leos/QSRS/code/QSRS/setup.R ',
                                               attr, ' ', vers, ' ', 'map', ' ', chunk,' ', cores,' ', dep, ' ', var))
                             
-                            writeLines(lines, paste0('code/batch_scripts/mapping/',attr,'/v',vers,'/QSRS',chunk,'-',dep,'-',var,'.sh'))
-                            system(paste0('qsub QSRS/code/batch_scripts/mapping/',attr,'/v',vers,'/QSRS',chunk,'-',dep,'-',var,'.sh'))
+                            writeLines(lines, paste0('/scratch/rsc3/leos/QSRS/batch_scripts/mapping/',attr,'/v',vers,'/QSRS',chunk,'-',dep,'-',var,'.sh'))
+                            system(paste0('qsub /scratch/rsc3/leos/QSRS/batch_scripts/mapping/',attr,'/v',vers,'/QSRS',chunk,'-',dep,'-',var,'.sh'))
                             Sys.sleep(1)
                         }
                     }
@@ -175,7 +175,7 @@ batch_script_mapping <- function(attribute, version, variance, depth, chunk){
         }
     }
 }
-batch_script_mapping(attribute = 'ec', version = 3, variance = 50, depth = 1, chunk = seq(1,200,by=10))
+batch_script_mapping(attribute = 'phw', version = 5, variance = 50, depth = 1, chunk = 2)
 
 ######################################################################################################################
 # use for mosaicing
@@ -200,8 +200,8 @@ batch_script_mosaicing <- function(attribute, version, variance, depth){
                                       attr, ' ', vers, ' ', 'mosiac', ' ', dep,' ',var))
                     
                     # write the lines to a file
-                    writeLines(lines, paste0('code/batch_scripts/mosaicing/',attr,'/QSRS',dep,'-',var,'.sh'))
-                    system(paste0('qsub QSRS/code/batch_scripts/mosaicing/',attr,'/QSRS',dep,'-',var,'.sh'))
+                    writeLines(lines, paste0('/scratch/rsc3/leos/QSRS/batch_scripts/mosaicing/',attr,'/QSRS',dep,'-',var,'.sh'))
+                    system(paste0('qsub /scratch/rsc3/leos/QSRS/batch_scripts/mosaicing/',attr,'/QSRS',dep,'-',var,'.sh'))
                     Sys.sleep(1)
                 }
             }
