@@ -31,20 +31,7 @@ nbags          <- 10    # applicable to all models but qrf
 piclplot       <- c(5, 10, 20, 40, 60, 80, 90, 95, 97.5, 99) # prediction interval confidence levels to validate
 transform      <- 'NA' # 'NA' or 'log' or 'logit100' or 'sqrt'
 
-# covariates
-covs_subset_cat <- c('Clim_GEOSS_Aus_Macroclimate_Bioclimatic_zones_qld.tif',
-                     
-                     'PM_GEOSS_Aus_Lithology_Lithology_qld.tif', 'PM_GEOSS_Aus_Lithology_Weathering_intensity', 'PM_Lithology_Map_Symbol_qld.tif',
-                     'PM_Lithology_Min_Geol_Age_qld.tif', 'PM_Lithology_Unit_Type_qld.tif', 'PM_Silica_qld.tif',
-                     
-                     'Relief_Aus_Landform_Topographic_moisture_potential_qld.tif', 'Relief_GEOSS_Aus_Landform_Land_surface_forms_qld.tif',
-                     'Relief_slope_relief.tif', 'Relief_tpi_class_1s_qld.tif', 'Relief_tpi_mask_1s_qld.tif',
-                     
-                     'Veg_GEOSS_Aus_Vegetation_structural_formations_qld.tif', 'Veg_IBRA_regions_qld.tif',
-                     'Veg_LandCoverTrend_evi_class_qld.tif', 'Veg_preEuropeanVeg_qld.tif',
-                     
-                     'Landuse_qld.tif')
-
+# covariate versions
 source(paste0(code, 'QSRS/versions.R'))
 
 ###################################################################################################################################
@@ -79,7 +66,7 @@ head(data)
 # remove soil.depth column and check depths
 if ('soil.depth' %in% colnames(data)){data <- data %>% dplyr::select(-soil.depth)}
 depths <- c(names(data[-(1:3)])) # list of depths in training data
-if(length(depths) > 6){depths <- depths[1:6]} # this may need editing when doing 'all' depths
+if(length(depths) > 6){depths <- depths[1:6]}
 print(paste0('Depths - ', paste(depths, collapse=', ')))
 
 # summarise data and check for outliers

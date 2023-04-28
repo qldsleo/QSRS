@@ -28,7 +28,7 @@ batch_script_extracting <- function(attribute){
         Sys.sleep(1)
     }
 }
-batch_script_extracting(attribute = 'col_p')
+batch_script_extracting(attribute = 'sand')
 
 ######################################################################################################################
 # use for modelling
@@ -59,7 +59,7 @@ batch_script_modelling <- function(attribute, version, depth, cpu){
         }
     }
 }
-batch_script_modelling(attribute = c('phw'), version = 5, depth = 1:6, cpu = 15)
+batch_script_modelling(attribute = c('ec'), version = 1, depth = 1, cpu = 35)
 
 ######################################################################################################################
 # use for model summarising
@@ -144,7 +144,7 @@ batch_script_mapping <- function(attribute, version, variance, depth, chunk){
                                 if (between(chunk, 1, 80)){
                                     cpus = 5; cores = 5; mem = 20; walltime = '0:10:00'
                                 } else if(chunk > 80){
-                                    cpus = 10; cores = 5; mem = 20; walltime = '0:10:00'
+                                    cpus = 10; cores = 5; mem = 20; walltime = '0:20:00'
                                 }
                             } else if (var != 50){
                                 if (between(chunk, 1, 75)){
@@ -175,7 +175,7 @@ batch_script_mapping <- function(attribute, version, variance, depth, chunk){
         }
     }
 }
-batch_script_mapping(attribute = 'phw', version = 5, variance = 50, depth = 1, chunk = 2)
+batch_script_mapping(attribute = 'phw', version = 5, variance = 50, depth = 1, chunk = seq(10,200,by=10))
 
 ######################################################################################################################
 # use for mosaicing
@@ -208,4 +208,4 @@ batch_script_mosaicing <- function(attribute, version, variance, depth){
         }
     }
 }
-batch_script_mosaicing(attribute = 'ec', version = 3, variance = c(50), depth = 1)
+batch_script_mosaicing(attribute = 'phw', version = 5, variance = c(50), depth = 1)

@@ -1,3 +1,19 @@
+###################################################################################################################################
+# list of categorical covariates in covariate folder
+covs_subset_cat <- c('Clim_GEOSS_Aus_Macroclimate_Bioclimatic_zones_qld.tif',
+                     
+                     'PM_GEOSS_Aus_Lithology_Lithology_qld.tif', 'PM_GEOSS_Aus_Lithology_Weathering_intensity', 'PM_Lithology_Map_Symbol_qld.tif',
+                     'PM_Lithology_Min_Geol_Age_qld.tif', 'PM_Lithology_Unit_Type_qld.tif', 'PM_Silica_qld.tif',
+                     
+                     'Relief_Aus_Landform_Topographic_moisture_potential_qld.tif', 'Relief_GEOSS_Aus_Landform_Land_surface_forms_qld.tif',
+                     'Relief_slope_relief.tif', 'Relief_tpi_class_1s_qld.tif', 'Relief_tpi_mask_1s_qld.tif',
+                     
+                     'Veg_GEOSS_Aus_Vegetation_structural_formations_qld.tif', 'Veg_IBRA_regions_qld.tif',
+                     'Veg_LandCoverTrend_evi_class_qld.tif', 'Veg_preEuropeanVeg_qld.tif',
+                     
+                     'Landuse_qld.tif')
+
+###################################################################################################################################
 # include '.tif' if adding specific covariates
 if (version == 1){
   covs_subset <- 'all'

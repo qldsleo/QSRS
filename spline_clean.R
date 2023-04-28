@@ -122,6 +122,7 @@ cords <- unique(cords)
 fff <- merge(ea.fit.cs$harmonised, cords, by = c("ID"), all.y=T)
 fff <- fff[c(9,10,1,2,3,4,5,6,7,8)]
 fff <- reshape::rename(fff, c(LATITUDE = "Y", LONGITUDE = "X"))
+fff <- fff %>% drop_na(X, Y)
 
 data <- fff
 # clean dataset
@@ -159,21 +160,21 @@ for (i in 4:ncol(data)){
   }
 }
 
-# if (attribute == 'col_p'){
-#   qlump <- vect('/scratch/rsc3/leos/QSRS/QLD_LANDUSE_June_2019/Current_landuse.shp')
-#   codes <- read.csv('/scratch/rsc3/leos/QSRS/QLD_LANDUSE_June_2019/ALUMClassV8.csv')
-#   qlump <- merge(qlump, codes, by.x='ALUM_Code', by.y='Tertiary')
-#   qlump <- subset(qlump, qlump$FertYN == 2)
-#   qlump_buf <- terra::buffer(qlump, width=75)
-#   col_p <- st_as_sf(data, coords=c('LONGITUDE','LATITUDE'), crs=crs('EPSG:4326')) %>% st_transform(crs=crs(qlump)) %>% vect
-#   SitesExcluded <- col_p[qlump_buf,]
-#   ExcludedSites <- as.data.frame(SitesExcluded) 
-#   ExcludedSites <- subset(ExcludedSites, X0.10.cm > 7)
-#   FinalSites <- col_p[!(col_p$ID %in% ExcludedSites$ID),]
-#   FinalSites <- terra::project(FinalSites, 'EPSG:4326')
-#   final_pts <- as.data.frame(FinalSites)
-#   coords <- crds(FinalSites)
-#   data <- data.frame('LATITUDE' = coords[,2], 'LONGITUDE' = coords[,1], 'ID' = final_pts$ID, 'X0.10.cm' = final_pts$X0.10.cm)
-# }
+if (attribute == 'col_p'){
+  qlump <- vect('/scratch/rsc3/leos/QSRS/QLD_LANDUSE_June_2019/Current_landuse.shp')
+  codes <- read.csv('/scratch/rsc3/leos/QSRS/QLD_LANDUSE_June_2019/ALUMClassV8.csv')
+  qlump <- merge(qlump, codes, by.x='ALUM_Code', by.y='Tertiary')
+  qlump <- subset(qlump, qlump$FertYN == 2)
+  qlump_buf <- terra::buffer(qlump, width=75)
+  col_p <- st_as_sf(data, coords=c('LONGITUDE','LATITUDE'), crs=crs('EPSG:4326')) %>% st_transform(crs=crs(qlump)) %>% vect
+  SitesExcluded <- col_p[qlump_buf,]
+  ExcludedSites <- as.data.frame(SitesExcluded)
+  ExcludedSites <- subset(ExcludedSites, X0.10.cm > 7)
+  FinalSites <- col_p[!(col_p$ID %in% ExcludedSites$ID),]
+  FinalSites <- terra::project(FinalSites, 'EPSG:4326')
+  final_pts <- as.data.frame(FinalSites)
+  coords <- crds(FinalSites)
+  data <- data.frame('LATITUDE' = coords[,2], 'LONGITUDE' = coords[,1], 'ID' = final_pts$ID, 'X0.10.cm' = final_pts$X0.10.cm)
+}
 
 write.csv(data, paste0(extd, '/harmonized.csv'), row.names=F)

@@ -1,7 +1,7 @@
 cores <- as.numeric(args[4])
 
-# check coord names
-data <- data %>% dplyr::rename(X = LONGITUDE, Y = LATITUDE)
+# # check coord names
+# data <- data %>% dplyr::rename(X = LONGITUDE, Y = LATITUDE)
 
 # get covariate file names
 files <- list.files(path=covd, pattern='.tif', full.names=T)
